@@ -23,14 +23,18 @@ contract KYCStorage {
 
     uint private nextId = 1;
 
-    event KYCAlreadyExists(uint id, string message);
+    event Notify(string message);
 
 
     // Add to registered KYC
     function addRegisteredKYC(string memory name, string memory dob, address bankAddress) external returns (uint) {
         registeredKYC[nextId] = KYCInfo(nextId, name, dob, bankAddress);
         isRegistered[nextId] = true;
+
+        emit Notify("KYC is registered Successfully.");
+
         return nextId++;
+
     }
 
     // Move to pending KYC with checks for existing approved KYC using name and dob
@@ -44,9 +48,12 @@ contract KYCStorage {
                 keccak256(abi.encodePacked(approvedKYC[i].dob)) == keccak256(abi.encodePacked(registeredKYC[id].dob))) {
                 
                 // Remove from registered KYC
-                emit KYCAlreadyExists(id, "KYC already approved with this name and date of birth");
+                
                 delete registeredKYC[id];
                 isRegistered[id] = false;
+
+                emit Notify("KYC already approved with this name and date of birth");
+                
                 return;
 
             }
@@ -56,9 +63,12 @@ contract KYCStorage {
                 keccak256(abi.encodePacked(pendingKYC[i].dob)) == keccak256(abi.encodePacked(registeredKYC[id].dob))) {
                 
                 // Remove from registered KYC
-                emit KYCAlreadyExists(id, "KYC already pending with this name and date of birth");
+                
                 delete registeredKYC[id];
                 isRegistered[id] = false;
+
+                emit Notify("KYC already pending with this name and date of birth");
+
                 return;
 
             }
@@ -71,6 +81,8 @@ contract KYCStorage {
         // Remove from registered KYC
         delete registeredKYC[id];
         isRegistered[id] = false;
+
+        emit Notify("KYC is move to Verification Status Successfully.");
     }
 
     // Approve KYC
@@ -83,6 +95,8 @@ contract KYCStorage {
         // Remove from pending KYC
         delete pendingKYC[id];
         isPending[id] = false;
+
+        emit Notify("KYC is Approve Successfully.");
     }
 
     // Reject KYC
@@ -95,6 +109,9 @@ contract KYCStorage {
         // Remove from pending KYC
         delete pendingKYC[id];
         isPending[id] = false;
+
+        emit Notify("KYC is Rejected.");
+
     }
 
     // Get KYC Status
